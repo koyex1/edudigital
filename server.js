@@ -1,5 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const cors = require('cors');
 const userRouter = require('./routers/userRouter') ;
 const bookmarkedRouter = require('./routers/bookmarkedRouter') ;
 const path = require('path');
@@ -7,13 +8,13 @@ require('dotenv').config();
 
 const app = express();
 
+app.use(cors());
 //for passing data into request body ie req.body
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 
 //autogenerates localhost/edudigsitals and connecths to it
-mongoose.connect(process.env.MONGODB_URL 
-    ,{
+mongoose.connect(process.env.MONGODB_URL ,{
         useNewUrlParser: true,
         useUnifiedTopology: true,
         useCreateIndex: true,
