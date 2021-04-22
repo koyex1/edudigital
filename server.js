@@ -10,11 +10,7 @@ const http = require('http')
 const server = http.Server(app);
 const Message = require('./models/messageModel'); 
 const User = require('./models/userModel');
-const io = require('socket.io')(server,{
-    cors:{
-        origin:'http://localhost:3000'
-    }
-});
+const io = require('socket.io')(server);
 
 app.use(cors());
 //for passing data into request body ie req.body

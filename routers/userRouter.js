@@ -121,10 +121,21 @@ userRouter.post('/search', expressAsyncHandler(async(req,res)=>{
 
 //get users with pending verification for help and support team
 userRouter.get('/pending', expressAsyncHandler(async(req,res)=>{
-const user = await User.find({verified: 'pending'});
+
 res.send({user});
 }))
 
+userRouter.put('/reverify/:id', expressAsyncHandler(async(req,res)=>{
+    const user = await User.findById(req.params.id);
+    if(user){
+        const {firstName,lastName} = req.body
+        user.role = "pending";
+        user.firstName = firstName
+        user.lastName = lastName
+        await user.save();
+    }
+    res.send({message: 'Reverification sent'});
+    }))
 
 userRouter.get('/pendingusers', expressAsyncHandler(async(req,res)=>{
 const user = await User.find({role: 'pending'})
