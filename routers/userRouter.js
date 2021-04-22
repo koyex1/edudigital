@@ -111,11 +111,12 @@ userRouter.post('/search', expressAsyncHandler(async(req,res)=>{
     const {search, currentPage, limit, language, rating, charge} = req.body;
     const startIndex =(currentPage -1) * limit;
     const endIndex = currentPage * limit;
-    const resultUsers = await User.find({firstName: search?search:{$ne:null} ,role: 'tutor', language: language?language:{$ne:null}, rating: {$gte: rating[0], $lte:rating[1]}, charge: {$gte:charge[0],$lte:charge[1]}}).sort({rating: "desc"});
-    const pageEnd = Math.ceil(resultUsers.length/limit);
+    const resultUsers = await User.find({firstName: search?search:{$ne:null} ,$or:[{role: 'tutor'},{role: 'Tutor'}], language: language?language:{$ne:null}, rating: {$gte: rating[0], $lte:rating[1]}, charge: {$gte:charge[0],$lte:charge[1]}}).sort({rating: "desc"});
+    const total = resultUsers.length
+    const pageEnd = Math.ceil(total/limit);
     console.log(resultUsers.length)
     const user = resultUsers.slice(startIndex, endIndex)
-    res.send({user, end: pageEnd});
+    res.send({user, end:pageEnd, total});
     }))
 
 //get users with pending verification for help and support team
@@ -133,6 +134,7 @@ res.send({user});
 userRouter.put('/verify/:id', expressAsyncHandler(async(req,res)=>{
 
     //---------ID FROM URL OR BODY MODIFICATION ------
+    console.log("i am in"    )
     const {status} = req.body
     const user = await User.findById(req.params.id);
     console.log(user)
