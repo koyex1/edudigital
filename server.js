@@ -22,7 +22,7 @@ app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 
 //autogenerates localhost/edudigsitals and connecths to it
-mongoose.connect('mongodb://localhost/edudigitals' || process.env.MONGODB_URL ,{
+mongoose.connect(process.env.MONGODB_URL ,{
         useNewUrlParser: true,
         useUnifiedTopology: true,
         useCreateIndex: true,
