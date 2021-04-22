@@ -12,7 +12,7 @@ const Message = require('./models/messageModel');
 const User = require('./models/userModel');
 const io = require('socket.io')(server, {
     cors:{
-        origin: '*',
+        origin: 'https://edudigital.herokuapp.com',
     }
 });
 
