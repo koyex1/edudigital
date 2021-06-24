@@ -5,9 +5,7 @@ const bookmarkedSchema = new mongoose.Schema({
     student: {type: mongoose.Schema.Types.ObjectId,
         ref: 'User',},
     tutor: {type: mongoose.Schema.Types.ObjectId,
-            ref: 'User',},
-    isPaid: {type: Boolean , default: false},
-    
+            ref: 'User',},    
 },
 
 {

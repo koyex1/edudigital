@@ -1,14 +1,6 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-const month= ['Jan','Feb','Mar','Apr','May', 'Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-
-const day = [
-    'Sunday','Mon','Tue', 'Wedy','Thu','Fri',
-    'Sat'];
-
-const date= new Date();
-
 
 const messageSchema = new Schema({
     sender: {
@@ -20,8 +12,10 @@ const messageSchema = new Schema({
         ref: 'User',
     },
     message: {type: String, required: true},
-    Date: {type: String, default: date},
+    read: {type: Boolean, default: false},
+    date: {type: Number, default: Date.now() +  60000 * (new Date().getTimezoneOffset())},
 },  
+    
 {
     timestamps: true
 }
