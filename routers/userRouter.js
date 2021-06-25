@@ -295,13 +295,13 @@ userRouter.post('/search', expressAsyncHandler(async (req, res) => {
     customArray = []
     newSearch && newSearch.forEach(search=>{   customArray.push( {firstName: {$regex: search, $options: 'i'}}, { lastName: {$regex: search, $options: 'i'}}, { subjects: {$regex: search, $options: 'i'}} )   })
     const firs = search ? customArray: [{firstName:{$ne:null}}, {lastname:{$ne:null}}, {subjects:{$ne:null}}];
-    const lang= {language: language?language:{$ne:null}}
+    const lang= {language: language? {$regex: language, $options: 'i'}:{$ne:null}}
     const coun = { country: country?country:{$ne:null}}
     const rat ={rating: {$gte: rating[0], $lte:rating[1]}}
     const  charg = {charge: {$gte:charge[0],$lte:charge[1]} } 
     const resultUsers = await User.find({ $or: firs, ...lang, ...coun, ...rat, ...charg })
                                         .sort({ rating: "desc" }); //,  role: 'Tutor', language: language?language:{$ne:null}, country: country?country:{$ne:null}, rating: {$gte: rating[0], $lte:rating[1]}, charge: {$gte:charge[0],$lte:charge[1]}  
-    //console.log(resultUsers)
+    console.log(resultUsers)
     const total = resultUsers.length
     const pageEnd = Math.ceil(total / limit);
     //console.log(resultUsers.length)
