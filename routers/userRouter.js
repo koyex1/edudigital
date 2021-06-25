@@ -33,8 +33,8 @@ expressAsyncHandler ( async (req, res) => {
 
 //signing in into an account
 userRouter.post('/signin', expressAsyncHandler(async (req, res) => {
-    const userExist = await User.findOne({ email: req.body.email});
-    const userVerified = await User.findOne({email: req.body.email,  verified: true});
+    const userExist = await User.findOne({ email: req.body.email.toLowerCase()});
+    const userVerified = await User.findOne({email: req.body.email.toLowerCase(),  verified: true});
 
     if (userVerified) {
         if (bcrypt.compareSync(req.body.password, userExist.password)) {
@@ -56,7 +56,7 @@ userRouter.post('/signin', expressAsyncHandler(async (req, res) => {
         res.status(404).send({ message: 'Invalid email or password' })
       }
       else if(!userVerified){
-        res.status(404).send({ message: 'User not verified' })
+        res.status(404).send({ message: 'User not verified. Please check your email to activate your account' })
 
       }
   }
@@ -99,7 +99,7 @@ userRouter.post('/register', upload.fields([{ name: 'file' }, { name: 'file2' }]
     const user = new User({
         firstName: userBody.firstName,
         lastName: userBody.lastName,
-        email: userBody.email,
+        email: userBody.email.toLowerCase(),
         password: bcrypt.hashSync(userBody.password, 8),
         interestedRole: userBody.interestedRole,
         language: langBody,
@@ -140,6 +140,8 @@ userRouter.post('/register', upload.fields([{ name: 'file' }, { name: 'file2' }]
                             <p> <a href=${verificationLink}> Click Here </a> to verify your email address</p>
                             `
         autoEmailer(userBody.email,subject , text, content)
+        res.send({ message: 'Account created successfully' });
+
 }
 }))
 

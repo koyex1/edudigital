@@ -22,8 +22,8 @@ const Transaction = require('./models/transactionModel');
 
 const io = require('socket.io')(server, {
     cors:{
-        origin: 'https://koyex1.github.io/edudigitals',
-        //origin: 'http://localhost:3000',
+        origin: ['https://koyex1.github.io/edudigitals', 'http://localhost:3000']
+         
     }
     
 });
@@ -39,7 +39,7 @@ app.use(bodyParser.urlencoded({limit: "50mb", extended: true, parameterLimit: 50
 //autogenerates localhost/edudigitals and connects to it
 // 'mongodb://localhost/edudigitals'
 //process.env.MONGODB_URL
-mongoose.connect(process.env.MONGODB_URL ,{
+mongoose.connect(process.env.MONGODB_URL || 'mongodb://localhost/edudigitals' ,{
         useNewUrlParser: true,
         useUnifiedTopology: true,
         useCreateIndex: true,
