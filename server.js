@@ -22,7 +22,7 @@ const Transaction = require('./models/transactionModel');
 
 const io = require('socket.io')(server, {
     cors:{
-        origin: ['https://koyex1.github.io/edudigitals', 'http://localhost:3000']
+        origin: ['https://koyex1.github.io/edudigitals', 'http://localhost:3000', 'https://edudigitals.herokuapp.com']
          
     }
     
@@ -336,23 +336,25 @@ app.use('/api/bookmark', bookmarkedRouter);
 app.use('/api/review', reviewRouter);
 app.use('/api/payment', transactionRouter);
 
-//app.use('/api/pay', paymentRouter);
 
 
 
-// if(process.env.NODE_ENV==='production'){
-//     app.use(express.static('frontend/build'));
-//     app.get('*',(req,res)=>{
-//         res.sendFile(path.resolve(__dirname, 'frontend' ,'build', 'index.html'))
-//     })
-// }
+//  if(process.env.NODE_ENV==='production'){
+
+//      app.use(express.static(path.join(__dirname, '../frontend/build')));
+//      app.get('*',(req,res)=>{
+//          res.sendFile(path.resolve(__dirname, 'frontend' ,'build', 'index.html'))
+//      })
+//  }else{
+// //test APIs
+// app.get('/', (req, res)=>{
+//     res.send('server is up and running')
+// });
+
+//  }
 
 
 
-//test APIs
-app.get('/', (req, res)=>{
-    res.send('server is up and running')
-});
 
 server.listen(process.env.PORT || 5000, ()=> {
     console.log('Serve at http://localhost:5000');
