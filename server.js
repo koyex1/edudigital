@@ -22,7 +22,7 @@ const Transaction = require('./models/transactionModel');
 
 const io = require('socket.io')(server, {
     cors:{
-        origin: ['https://koyex1.github.io/edudigitals', 'http://localhost:3000', 'https://edudigitals.herokuapp.com']
+        origin: 'https://edudigitals.herokuapp.com',
          
     }
     
