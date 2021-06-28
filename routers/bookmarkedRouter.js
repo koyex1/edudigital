@@ -9,7 +9,7 @@ const bookmarkedRouter = express.Router();
 
 bookmarkedRouter.post('/add/:id', expressAsyncHandler(async(req, res)=>{
    //should be req.user._id with isAuth by using body for now
-   const student = await User.findById(req.params.id);
+  // const student = await User.findById(req.params.id);
     //should be req.body._id but using 
     const tutor = await User.findById(req.body.bookedId);
 
@@ -17,7 +17,7 @@ bookmarkedRouter.post('/add/:id', expressAsyncHandler(async(req, res)=>{
     console.log(student);
 
     let bookmarked = new Bookmarked({
-        student: student._id,
+        student: req.params.id,
         tutor: tutor._id,
     });
 
@@ -31,7 +31,7 @@ bookmarkedRouter.post('/add/:id', expressAsyncHandler(async(req, res)=>{
 bookmarkedRouter.get('/get/:id', expressAsyncHandler(async(req,res)=>{
 
     //req.params.id replace with isAuth req.user._id
-    const tutors = await Bookmarked.find({student: req.params.id}).populate('tutor');
+    const tutors = await Bookmarked.find({student: req.params.id}).select('tutor').populate('tutor', {firstName: 1, lastName: 1, subjects: 1, language: 1, country: 1, charge: 1});
     console.log(tutors)
 
     res.send({tutors});

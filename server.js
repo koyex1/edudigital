@@ -106,12 +106,12 @@ io.on('connection', (socket) =>{
 
     socket.on('sendMessage', async (senderId, recipientId, message)=>{
         console.log(senderId)
-        const sender = await User.findById(senderId);
-        const recipient = await User.findById(recipientId)
+        //const sender = await User.findById(senderId).select('firstName lastName profilePicture');
+        //const recipient = await User.findById(recipientId).select('firstName lastName profilePicture');
 
         const messageStore = new Message({
-            sender: sender._id,
-            recipient: recipient._id,
+            sender: senderId,
+            recipient: recipientId,
             message: message,
         })
 
@@ -136,7 +136,7 @@ socket.on('typingStatus', async(senderId, recipientId)=>{
 
 socket.on('notification', async(senderId)=>{
    const notification = await Transaction.find({$or: [{tutor: senderId},{student: senderId}]})
-   console.log('number of messages ' + notification.length)
+   console.log('number of notifications ' + notification.length)
 
    socket.emit('notificationNo', notification.length)
 })
@@ -190,7 +190,7 @@ socket.on('loadMessages', async (senderId, recipientId) =>{
 
         ]}
     ]
-});
+}).select('sender recipient read');
 
 
 
@@ -227,8 +227,9 @@ await x.save();
 
     ]}
 ]
-});
+}).select(' message date')
 
+console.log(allMessages)
 socket.emit('firstMessage',{allMessages, recipientId , senderId})
 //io.to(connectedUsers[recipientId]).to(connectedUsers[senderId]).emit('initialMessages', {allMessages, recipientId , senderId})
 //io.to(room).to(roomReversed).emit('initialMessages', {allMessages, recipientId , senderId})
@@ -275,7 +276,7 @@ socket.on('enteredMessage', async(recipientId)=>{
 
 socket.on('getContacts', async(senderId)=>{
     
-    const distinct = await Message.find({$or:[{sender: senderId},{recipient: senderId}]})
+    const distinct = await Message.find({$or:[{sender: senderId},{recipient: senderId}]}).select('sender recipient')
     const fuck = distinct.map(x=>{
         if(x.sender == senderId){
             return x.recipient.toString()
@@ -291,7 +292,7 @@ socket.on('getContacts', async(senderId)=>{
 
     const contacts = await User.find({$or: modifiedDistinct.map(
         x=>({_id: x})
-    )})
+    )}).select('firstName lastName profilePicture')
 
     const modifiedContacts = [];
 
@@ -303,11 +304,12 @@ socket.on('getContacts', async(senderId)=>{
         }
 
   
-        const messagesPerContacts = await Message.find({sender: x._id, recipient: senderId, read: false})
+        const messagesPerContacts = await Message.find({sender: x._id, recipient: senderId, read: false}).select('message')
         const mPerC = messagesPerContacts.length
-        const message = await Message.findOne({$or:[{sender: x._id},{recipient: x._id}]}).sort({_id: -1})
+        const message = await Message.findOne({$or:[{sender: x._id},{recipient: x._id}]}).sort({_id: -1}).select('message')
         modifiedContacts.push({ ...message.toObject(), ...x.toObject(), onlineStatus, mPerC})
     }
+    console.log(modifiedContacts)
 
     io.to(connectedUsers[senderId]).emit('contactsRefreshed', modifiedContacts)
 

@@ -34,7 +34,7 @@ transactionRouter.post('/add', expressAsyncHandler(async(req, res)=>{
 transactionRouter.get('/ongoingTutors/:id', expressAsyncHandler(async(req,res)=>{
 
     //req.params.id replace with isAuth req.user._id
-    const tutors = await Transaction.find({student: req.params.id}).populate('tutor');
+    const tutors = await Transaction.find({student: req.params.id}).select('tutor amount').populate('tutor', {firstName: 1, lastName: 1, subjects: 1});
     console.log(tutors)
     res.send({tutors});
     
@@ -43,7 +43,7 @@ transactionRouter.get('/ongoingTutors/:id', expressAsyncHandler(async(req,res)=>
 transactionRouter.get('/ongoingStudents/:id', expressAsyncHandler(async(req,res)=>{
 
     //req.params.id replace with isAuth req.user._id
-    const students = await Transaction.find({tutor: req.params.id}).populate('student');
+    const students = await Transaction.find({tutor: req.params.id}).select('tutor amount').populate('student', {firstName: 1, lastName: 1, subjects: 1});
     console.log(students)
 
     res.send({students});
@@ -52,7 +52,7 @@ transactionRouter.get('/ongoingStudents/:id', expressAsyncHandler(async(req,res)
 
 transactionRouter.get('/getAll', expressAsyncHandler(async(req,res)=>{
 
-    const allTransactions = await Transaction.find({}).populate('tutor').populate('student')
+    const allTransactions = await Transaction.find({}).select('orderId amount transactionTime appeal appealReason complete completeReason').populate('tutor', {firstName: 1, lastName: 1, email: 1}).populate('student', {firstName: 1, lastName: 1, email: 1});
 
     console.log(allTransactions)
 
@@ -63,8 +63,8 @@ transactionRouter.get('/getAll', expressAsyncHandler(async(req,res)=>{
 transactionRouter.put('/complete/:id', expressAsyncHandler(async(req,res)=>{
 console.log(req.body)
     const {complete, reason, tutor} = req.body
-    const transaction = await Transaction.findById(req.params.id)
-    const user = await User.findById(tutor)
+    const transaction = await Transaction.findById(req.params.id).select('complete completeReason appeal')
+    const user = await User.findById(tutor).select('tutorials')
     console.log(user)
 
     transaction.complete = complete;
@@ -86,7 +86,7 @@ console.log(req.body)
 transactionRouter.put('/appeal/:id', expressAsyncHandler(async(req,res)=>{
 console.log(req.body)
     const {appeal, reason} = req.body
-    const transaction = await Transaction.findById( req.params.id)
+    const transaction = await Transaction.findById( req.params.id).select('appeal appealReason')
 
     transaction.appeal = appeal;
     transaction.appealReason = reason
@@ -103,7 +103,7 @@ console.log(req.body)
 
 transactionRouter.get('/notification/:id', expressAsyncHandler(async(req,res)=>{
 
-    const notification = await Transaction.find({$or: [{tutor: req.params.id},{student: req.params.id}]}).populate('tutor').populate('student')
+    const notification = await Transaction.find({$or: [{tutor: req.params.id},{student: req.params.id}]}).select('complete appeal orderId').populate('tutor', {firstName: 1, lastName: 1}).populate('student',  {firstName: 1, lastName: 1})
 
     res.send(notification)
         

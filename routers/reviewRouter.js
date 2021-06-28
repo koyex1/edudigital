@@ -54,7 +54,7 @@ reviewRouter.post('/add/:id', expressAsyncHandler(async(req, res)=>{
     console.log(currentPage + ' ' + limit)
     const startIndex = (currentPage - 1) * limit;
     const endIndex = currentPage * limit;
-   const findReview = await Review.find({tutor: req.params.id}).populate('student')
+   const findReview = await Review.find({tutor: req.params.id}).select('rating student review createdAt').populate('student', {firstName: 1, lastName: 1, createdAt: 1})
    const total = findReview.length;
    const pageEnd = Math.ceil(total/limit)
    const review = findReview.slice(startIndex, endIndex)

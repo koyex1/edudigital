@@ -16,11 +16,9 @@ const userRouter = express.Router();
 userRouter.get('/all', expressAsyncHandler(async (req, res) => {
 
 
-    let allUsers = await User.find();
-     let users = allUsers.map(x=>(
-         {id: x._id, firstName: x.firstName, lastName: x.lastName, email: x.email, subjects: x.subjects}
-     ))
-    res.send({ users });
+    let allUsers = await User.find().select('firstName lastName email subjects');
+
+    res.send({ allUsers });
 
 }));
 
@@ -33,8 +31,8 @@ expressAsyncHandler ( async (req, res) => {
 
 //signing in into an account
 userRouter.post('/signin', expressAsyncHandler(async (req, res) => {
-    const userExist = await User.findOne({ email: req.body.email.toLowerCase()});
-    const userVerified = await User.findOne({email: req.body.email.toLowerCase(),  verified: true});
+    const userExist = await User.findOne({ email: req.body.email.toLowerCase()}).select('firstName lastName password  email role');
+    const userVerified = await User.findOne({email: req.body.email.toLowerCase(),  verified: true}).select('firstName lastName password email role');
 
     if (userVerified) {
         if (bcrypt.compareSync(req.body.password, userExist.password)) {
@@ -66,7 +64,7 @@ userRouter.post('/signin', expressAsyncHandler(async (req, res) => {
 //upload.single('olumide'),
 userRouter.put('/upload/:id', upload.single('file'), expressAsyncHandler(async (req, res) => {
 
-    const user = await User.findById(req.params.id)
+    const user = await User.findById(req.params.id).select('profilePicture')
     console.log(req.file)
     user.profilePicture.data = req.file.buffer
     user.profilePicture.contentType = req.file.mimetype
@@ -89,7 +87,7 @@ userRouter.post('/register', upload.fields([{ name: 'file' }, { name: 'file2' }]
 
 //console.log(req.files.file[0].buffer.toString('base64'))
 
-    const availableUser = await User.findOne({ email: userBody.email });
+    const availableUser = await User.exists({ email: userBody.email });
     if (availableUser) {
         console.log('do you want to be unfortunate')
         res.status(404).send({ message: 'Email already exists' });
@@ -151,7 +149,7 @@ userRouter.post('/validateEmail/:id', expressAsyncHandler(async (req, res) => {
     console.log(tokenValidate)
     let createdUser = null;
     if(tokenValidate){
-        createdUser = await User.findById({_id: tokenValidate.user._id});
+        createdUser = await User.findById({_id: tokenValidate.user._id}).select('verified');
         createdUser.verified = true;
         await createdUser.save();
        await Token.findOneAndDelete({token: req.params.id});
@@ -174,12 +172,11 @@ userRouter.post('/sendEmail', expressAsyncHandler(async (req, res) => {
     const {email} = req.body
     console.log(email)
 
-    const userBody = await User.findOne({email: email})
+    const userBody = await User.findOne({email: email}).select('firstName lastName email')
     if(!userBody){
-        res.status(404).send({ message: 'Email doesnt exist' });
-        throw('Error')
+        res.send({ message: 'Email doesnt exist' });
     }
-   
+   else if(userBody){
     const tokenGenerate = new Token({
         email: email,
     })
@@ -199,7 +196,7 @@ userRouter.post('/sendEmail', expressAsyncHandler(async (req, res) => {
                         <p> <a href=${verificationLink}> Click Here </a> to change Password</p>
                         `
     autoEmailer(email,subject , text, content)
-   
+   }
 }))
 
 
@@ -214,7 +211,7 @@ userRouter.post('/changePassAuth', expressAsyncHandler(async (req, res) => {
    
     let user = null;
     if(tokenValidate){
-        user = await User.findOne({email: tokenValidate.email});
+        user = await User.findOne({email: tokenValidate.email}).select('password');
         user.password = bcrypt.hashSync(password, 8)
         await user.save();
        await Token.findOneAndDelete({token: token});
@@ -319,7 +316,7 @@ userRouter.get('/pending', expressAsyncHandler(async (req, res) => {
 
 userRouter.post('/reverify/:id', upload.fields([{ name: 'file' }, { name: 'file2' }]), expressAsyncHandler(async (req, res) => {
     console.log("reverify in" + req.params.id)
-    const user = await User.findById(req.params.id);
+    const user = await User.findById(req.params.id).select('role firstName lastName email idCard profilePicture');
     let userSave = null;
     console.log(req.body.user)
     const userBody = JSON.parse(req.body.user)
@@ -350,7 +347,7 @@ userRouter.post('/reverify/:id', upload.fields([{ name: 'file' }, { name: 'file2
 }))
 
 userRouter.get('/pendingusers', expressAsyncHandler(async (req, res) => {
-    const user = await User.find({ role: 'pending' , verified: true})
+    const user = await User.find({ role: 'pending' , verified: true}).select('firstName lastName profilePicture idCard');
     res.send({ user });
 }))
 
@@ -359,7 +356,7 @@ userRouter.put('/verify/:id', expressAsyncHandler(async (req, res) => {
     //---------ID FROM URL OR BODY MODIFICATION ------
     console.log("i am in")
     const { status } = req.body
-    const user = await User.findById(req.params.id);
+    const user = await User.findById(req.params.id).select('role interestedRole firstName lastName email');;
     let userSave = null
     let message = null
 
@@ -375,6 +372,8 @@ userRouter.put('/verify/:id', expressAsyncHandler(async (req, res) => {
         message = 'User has been successfully Unverified'
     }
 
+    console.log(userSave)
+
 
 
     res.send({
@@ -389,19 +388,23 @@ userRouter.put('/verify/:id', expressAsyncHandler(async (req, res) => {
         message: message
     })
 
-    if (status = 'true') {
-        const subject = 'Accout Verified'
-        const text = userSave.firstName + ' ' + userSave.lastName 
-        const content = `<h1 style="color: #060b26;">Edudigitals</h1>
+    let subject;
+    let text;
+    let content;
+
+    if (status == 'true') {
+        subject = 'Accout Verified'
+        text = userSave.firstName + ' ' + userSave.lastName 
+        content = `<h1 style="color: #060b26;">Edudigitals</h1>
                         <h3 style="color: #060b26;">Hi ${userSave.firstName}  ${userSave.lastName}  Your account has now been verified</h3>
                         <p> We are glad to inform you your account has now
                         been verified. You can login now and start using your account</p>
                         `}
 
-    if (status = 'false') {
-        const subject = 'Accout Unverified'
-        const text = userSave.firstName + ' ' + userSave.lastName 
-        const content = `<h1 style="color: #060b26;">Edudigitals</h1>
+    else if(status == 'false') {
+        subject = 'Accout Unverified'
+        text = userSave.firstName + ' ' + userSave.lastName 
+        content = `<h1 style="color: #060b26;">Edudigitals</h1>
                         <h3 style="color: #060b26;">Hi ${userSave.firstName}  ${userSave.lastName}  Please wait patiently while we verify your details</h3>
                         <p>Your account has been unverified. This is due to either your Name, Identification card and Profile Picture not matching. Please login
                         to ensure this information are correct by resubmitting your details</p>
@@ -416,7 +419,7 @@ userRouter.put('/verify/:id', expressAsyncHandler(async (req, res) => {
 
 //getting a user by id
 userRouter.get('/:id', expressAsyncHandler(async (req, res) => {
-    const user = await User.findById(req.params.id);
+    const user = await User.findById(req.params.id).select('firstName lastName charge country rating tutorials language subjects about profilePicture');;
     let subjects = user.subjects.split(',')
     let language = user.language.split(',')
     console.log(subjects)
@@ -444,7 +447,7 @@ userRouter.put('/changePassword/:id', expressAsyncHandler(async (req, res) => {
     const {oldPassword, newPassword} = req.body
 
   
-    const user = await User.findById(req.params.id)
+    const user = await User.findById(req.params.id).select('password');
 
     console.log(bcrypt.compareSync(oldPassword, user.password))
  
