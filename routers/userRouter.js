@@ -299,7 +299,7 @@ userRouter.post('/search', expressAsyncHandler(async (req, res) => {
     const coun = { country: country?country:{$ne:null}}
     const rat ={rating: {$gte: rating[0], $lte:rating[1]}}
     const  charg = {charge: {$gte:charge[0],$lte:charge[1]} } 
-    const resultUsers = await User.find({ $or: firs, ...lang, ...coun, ...rat, ...charg })
+    const resultUsers = await User.find({ $or: firs, ...lang, ...coun, ...rat, ...charg }).select('firstName lastName charge country rating tutorials language subjects profilePicture')
                                         .sort({ rating: "desc" }); //,  role: 'Tutor', language: language?language:{$ne:null}, country: country?country:{$ne:null}, rating: {$gte: rating[0], $lte:rating[1]}, charge: {$gte:charge[0],$lte:charge[1]}  
     console.log(resultUsers)
     const total = resultUsers.length
@@ -307,6 +307,7 @@ userRouter.post('/search', expressAsyncHandler(async (req, res) => {
     //console.log(resultUsers.length)
     const user = resultUsers.slice(startIndex, endIndex)
     //console.log(req.headers.referer)
+
     res.send({ user, end: pageEnd, total });
 }))
 
