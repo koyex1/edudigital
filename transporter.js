@@ -14,7 +14,7 @@ let transporter = nodemailer.createTransport({
     service: 'SendinBlue',
     auth:{
         user: 'volliview@gmail.com', //testAccount.user,
-        pass: '75PCgYqhQzS3AdkF'//process.env.NODEMAILER_PASSWORD//testAccount.pass,
+        pass: 's'//process.env.NODEMAILER_PASSWORD//testAccount.pass,
     }
 })
 
