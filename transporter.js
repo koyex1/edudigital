@@ -11,10 +11,10 @@ let transporter = nodemailer.createTransport({
     //host: 'smtp.ethereal.email',
     //port: 587,
     //secure: false,
-    service: 'gmail',
+    service: 'SendinBlue',
     auth:{
         user: 'volliview@gmail.com', //testAccount.user,
-        pass: process.env.NODEMAILER_PASSWORD//testAccount.pass,
+        pass: '75PCgYqhQzS3AdkF'//process.env.NODEMAILER_PASSWORD//testAccount.pass,
     }
 })
 
@@ -23,7 +23,7 @@ transporter.use('compile', inLineCss())
 
     let Info = await transporter.sendMail({
 
-        from: 'Edudigitals',
+        from: 'volliview@gmail.com',
         to: email,
         subject: subject,
         text: text,

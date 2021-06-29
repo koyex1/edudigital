@@ -419,7 +419,7 @@ userRouter.put('/verify/:id', expressAsyncHandler(async (req, res) => {
 
 //getting a user by id
 userRouter.get('/:id', expressAsyncHandler(async (req, res) => {
-    const user = await User.findById(req.params.id).select('firstName lastName charge country rating tutorials language subjects about profilePicture');;
+    const user = await User.findById(req.params.id).select('firstName lastName email phoneNo charge country rating tutorials language subjects about profilePicture');;
     let subjects = user.subjects.split(',')
     let language = user.language.split(',')
     console.log(subjects)
